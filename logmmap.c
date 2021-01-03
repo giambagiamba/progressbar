@@ -8,22 +8,57 @@ typedef struct{
 	unsigned int len;
 	unsigned int perc;
 	unsigned int nblks;
+	int err;
+	void* A;
+	int file;
 }pbar;
 
 //Crea la struttura grafica della barra.
 //La lunghezza e il puntatore dentro lo struct devono essere
 //gia' preparati prima con mmap.
 //Prevede barra lunga len e percentuale (xx%) e accapo a terminare.
-int pbar_init(pbar* progbar){
-	unsigned int i, len=progbar->len, perc=progbar->perc, nblks;
-	char* mem=progbar->bar;
+pbar pbar_init(){
+	unsigned int i, len, perc, nblks;
+	char* mem;
+	pbar progbar;
+	
+	progbar.err=0;
 
-	if(perc<0 || perc>99)	return -1;
-	if(mem==0)	return -1;
-	if(len<3)	return -1;
+	progbar.file=open("reso.log", O_RDWR|O_CREAT, S_IRWXU|S_IRWXG|S_IRWXO);
+	if(progbar.file<0){
+		printf("file: %x\n", progbar.file);
+		progbar.err=-1;
+	}
 
+	if(posix_fallocate(progbar.file, 0, 32)!=0){
+		printf("Errore fallocate\n");
+		progbar.err=-1;
+	}
+
+	progbar.A=mmap(0, 32, PROT_WRITE|PROT_READ, MAP_SHARED, progbar.file, 0);
+	progbar.len=20;
+	progbar.bar=(char*)progbar.A;
+	progbar.perc=0;
+	
+	len=progbar.len;
+	perc=progbar.perc;
+	mem=progbar.bar;
+
+	if(perc<0 || perc>99){
+		progbar.err=-1;
+		return progbar;
+	}
+	if(mem==0){
+		progbar.err=-1;
+		return progbar;
+	}
+	if(len<3){
+		progbar.err=-1;	
+		return progbar;
+	}
+	
 	nblks=perc*(len)/100;
-	progbar->nblks=nblks;
+	progbar.nblks=nblks;
 	mem[0]='[';
 	for(i=1;i<nblks+1;i++){
 		mem[i]='|';
@@ -36,8 +71,10 @@ int pbar_init(pbar* progbar){
 	mem[len+3]=(perc%10)+48;
 	mem[len+4]='%';
 	mem[len+5]=0xa;
+	
+	printf("barra: %p %u %u\n", progbar.bar, progbar.len, progbar.perc);
 
-	return 0;
+	return progbar;
 }
 
 int pbar_draw(pbar* progbar){
@@ -57,4 +94,9 @@ int pbar_draw(pbar* progbar){
 	mem[len+3]=(perc%10)+48;
 
 	return 0;
+}
+
+void pbar_close(pbar* progbar){
+	munmap(progbar->A, 32);
+	close(progbar->file);
 }

@@ -10,18 +10,16 @@
 #include "logmmap.c"
 
 
-#define N 1000000000
+#define N 1E10
 
 
 int main(){
-	int i;
+	uint64_t i;
 	//uint64_t* s;
 	workspace_t w;
 	//vsd x;
 	double y, z;
-	unsigned int pi=0;
-	int file;
-	void* A;
+	uint64_t pi=0;
 	pbar barra;
 
 	//s=malloc(2*sizeof(uint64_t));
@@ -34,17 +32,9 @@ int main(){
 	//w.state=0;
 	
 	SetRandomSeed(&w);
-	file=open("reso.log", O_RDWR|O_CREAT, S_IRWXU|S_IRWXG|S_IRWXO);
-	if(file<0){printf("file: %x\n", file); return -1;}
-
-	if(posix_fallocate(file, 0, 32)!=0){printf("Errore fallocate\n"); return -1;}
-
-	A=mmap(0, 32, PROT_WRITE|PROT_READ, MAP_SHARED, file, 0);
-	barra.len=20;
-	barra.bar=(char*)A;
-	barra.perc=0;
-	pbar_init(&barra);
-	printf("barra: %p %u %u\n", barra.bar, barra.len, barra.perc);
+	barra=pbar_init();
+	if (barra.err!=0)
+		return -1;
 
 	for(i=0;i<N;i++){
 		y = RSUnif(&w, 0., 1.);
@@ -61,8 +51,7 @@ int main(){
 	}
 	printf("pi = %.16le\n", (double)pi*4/N);
 
-	munmap(A, 32);
-	close(file);
+	pbar_close(&barra);
 
 	return 0;
 
