@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
 //#include<sys/types.h>
-//#include<sys/mman.h>
+#include<sys/mman.h>
 
 #define ERR_FILEOPEN 1
 #define ERR_FILEALLOC 2
@@ -113,7 +115,8 @@ void pbar_draw(pbar* progbar){
 	else{
 		//TODO
 	}
-	mem[len+2]=(perc/100)+'0';
+	//mem[len+2]=(perc/100)*(1+'0')-' '*(perc/100-1);
+	mem[len+2]=(perc/100)*(1+'0'-' ')+' ';
 	mem[len+3]=((perc/10)%10)+'0';
 	mem[len+4]=(perc%10)+'0';
 

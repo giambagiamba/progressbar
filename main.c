@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <math.h>
-#include<unistd.h>
-#include<fcntl.h>
-#include<sys/types.h>
-#include<sys/mman.h>
+//#include <stdint.h>
+//#include <math.h>
+//#include<sys/types.h>
 #include "xmmrand.c"
 #include "logmmap.c"
 
@@ -36,7 +33,7 @@ int main(){
 		z = RSUnif(&w, 0., 1.);
 		if((y*y + z*z) < 1)	pi++;
 
-		if(i*100/N==barra.perc+1){
+		if(i*100/(N-1)==barra.perc+1){
 			//printf("perc= %lu\n", i*100/N);
 			barra.perc++;
 			pbar_draw(&barra);
