@@ -23,6 +23,8 @@ int main(){
 	barra.len=20;
 	barra.err=0;
 	barra.perc=0;
+	barra.i=0;
+	barra.Num=N;
 	pbar_init(&barra);
 	if (barra.err!=0){
 		return -1;
@@ -33,9 +35,12 @@ int main(){
 		z = RSUnif(&w, 0., 1.);
 		if((y*y + z*z) < 1)	pi++;
 
+		//barra.i=i;
+		//pbar_draw(&barra);
 		if(i*100/(N-1)==barra.perc+1){
 			//printf("perc= %lu\n", i*100/N);
-			barra.perc++;
+			//barra.perc++;
+			barra.i=i;
 			pbar_draw(&barra);
 		}
 	}
