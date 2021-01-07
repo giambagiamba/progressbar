@@ -7,7 +7,7 @@
 #include "logmmap.c"
 
 
-#define N (unsigned int)1E9
+#define N (uint64_t)1E9
 
 
 int main(){
@@ -19,13 +19,7 @@ int main(){
 	char* filename="reso.log";
 
 	SetRandomSeed(&w);
-	barra.filename=filename;
-	barra.len=20;
-	barra.err=0;
-	barra.perc=0;
-	barra.i=0;
-	barra.Num=N;
-	pbar_init(&barra);
+	pbar_init(&barra, filename, N, 20);
 	if (barra.err!=0){
 		return -1;
 	}
@@ -39,9 +33,7 @@ int main(){
 		//pbar_draw(&barra);
 		if(i*100/(N-1)==barra.perc+1){
 			//printf("perc= %lu\n", i*100/N);
-			//barra.perc++;
-			barra.i=i;
-			pbar_draw(&barra);
+			pbar_draw(&barra, i);
 		}
 	}
 	printf("pi = %.16le\n", (double)pi*4/N);

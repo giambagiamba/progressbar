@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include<unistd.h>
 #include<fcntl.h>
 #include<time.h>
-//#include<sys/types.h>
 #include<sys/mman.h>
+#define ADDLEN 23
 
 #define ERR_FILEOPEN 1
 #define ERR_FILEALLOC 2
@@ -12,125 +13,132 @@
 #define WARN_PERC 8
 #define WARN_LEN 16
 #define ERR_MEM 32
+#define WARN_NUM 64
 
 
 typedef struct{
 	char* bar;
 	unsigned int len;
 	//unsigned int perc;
-	unsigned int i;
-	unsigned int Num;
+	//uint64_t i;
+	uint64_t Num;
 	unsigned int perc;
 	unsigned int nblks;
 	unsigned int err;
-	char* filename;
+	//char* filename;
 	int file;
-	time_t start;
+	double start;
 }pbar;
 
 //Crea la struttura grafica della barra.
 //La lunghezza e il puntatore dentro lo struct devono essere
 //gia' preparati prima con mmap.
 //Prevede barra lunga len e percentuale (xx%) e accapo a terminare.
-void pbar_init(pbar* progbar){
-	unsigned int i, Num, len, perc, nblks;
-	unsigned int u, d, c;
+void pbar_init(pbar* progbar, char* filename, uint64_t Num, unsigned int len){
+	uint64_t i, iNum;
+	unsigned int ilen;
 	char* mem;
 	int file;
 	
+	//progbar->i=0;
 	progbar->err=0;
-	len=progbar->len;
-	//perc=progbar->perc;
+	
+	ilen=len;
+	iNum=Num;
+	if(len<3){
+		progbar->err|=WARN_LEN;
+		ilen=8;
+	}
+	if(Num==0){
+		progbar->err|=WARN_NUM;
+		iNum=1e6;
+	}
+	progbar->Num=iNum;
+	progbar->len=ilen;
 
-	file=open(progbar->filename, O_RDWR|O_CREAT, S_IRWXU|S_IRWXG|S_IRWXO);
+	file=open(filename, O_RDWR|O_CREAT, S_IRWXU|S_IRWXG|S_IRWXO);
 	if(file<0){
 		//printf("file: %x\n", progbar.file);
 		progbar->err|=ERR_FILEOPEN;
 		return;
 	}
 
-	if(posix_fallocate(file, 0, len+24)!=0){
+	if(posix_fallocate(file, 0, ilen+ADDLEN+1)!=0){
 		//printf("Errore fallocate\n");
 		progbar->err|=ERR_FILEALLOC;
 		return;
 	}
 
 	progbar->file=file;
-	mem=mmap(0, len+24, PROT_WRITE|PROT_READ, MAP_SHARED, file, 0);
+	mem=mmap(0, ilen+ADDLEN+1, PROT_WRITE|PROT_READ, MAP_SHARED, file, 0);
 	if((void*)mem==(void*)-1){
 		progbar->err|=ERR_MMAP;
 		return;
 	}
-	//progbar.len=20;
-	//progbar.bar=(char*)progbar.A;
-	//progbar.perc=0;
 	
 	progbar->bar=mem;
+	//progbar->filename=filename;
 
-	i=progbar->i;
-	Num=progbar->Num;
-	if(i<0 || i>Num-1){
-		progbar->err|=WARN_PERC;
-		perc=0;
-		//return;
-	}
-	if(len<3){
-		progbar->err|=WARN_LEN;
-		len=8;
-		//return;
-	}
-	
-	nblks=(long unsigned int)i*len/(Num-1);
-	progbar->nblks=nblks;
+	//nblks=i*ilen/(iNum-1);
+	//perc=i*100/(iNum-1);
+	progbar->nblks=0;
+	progbar->perc=0;
 	mem[0]='[';
-	for(i=1;i<nblks+1;i++){
-		mem[i]='|';
-	}
-	for(;i<len+1;i++){
+	//for(i=1;i<nblks+1;i++){
+	//	mem[i]='|';
+	//}
+	for(i=1;i<ilen+1;i++){
 		mem[i]=' ';
 	}
-	mem[len+1]=']';
+	mem[ilen+1]=']';
 	
-	perc=(long unsigned int)i*100/(Num-1);
-	progbar->perc=perc;
-	u=perc%10;
-	d=(perc/10)%10;
-	c=perc/100;
-	mem[len+2]=c*(1+'0'-' ')+' ';
-	mem[len+3]=(c+d==0) ? ' ' : d+'0';//Migliorare
-	mem[len+4]=u+'0';
+	mem[ilen+2]=' ';
+	mem[ilen+3]=' ';
+	mem[ilen+4]='0';
 	
-	//mem[len+2]=c+'0';
-	//mem[len+3]=((perc/10)%10)+'0';
-	//mem[len+4]=u+'0';
-	mem[len+5]='%';
-	//mem[len+6]=0xa;
-	mem[len+19]=' ';
-	mem[len+20]='E';
-	mem[len+21]='T';
-	mem[len+22]='A';
-	mem[len+23]=0xa;
+	mem[ilen+5]='%';
+	//mem[ilen+6]=0xa;
+	for(i=ilen+6;i<ilen+19;i++){
+		mem[i]=' ';
+	}
+	mem[ilen+19]=' ';
+	mem[ilen+20]='E';
+	mem[ilen+21]='T';
+	mem[ilen+22]='A';
+	mem[ilen+23]=0xa;
 	
 	//printf("barra: %p %u %u\n", progbar.bar, progbar.len, progbar.perc);
 	
-	progbar->start=time(NULL);
+	//progbar->start=time(NULL);
+	{
+		struct timespec ts;
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		progbar->start=(double)ts.tv_sec+(double)ts.tv_nsec*1e-9;
+	}
 
 	return;
 }
 
-void pbar_eta(pbar* progbar){
+void pbar_eta(pbar* progbar, uint64_t argi)__attribute__((always_inline));
+void pbar_eta(pbar* progbar, uint64_t argi){
 	char* mem = progbar->bar;
 	unsigned int len=progbar->len;
-	time_t start=progbar->start;
-	time_t now, est, diff, et;
+	double start=progbar->start;
+	double now, est, diff;
+	time_t et;
 	struct tm* eta;
 	
-	now=time(NULL);
-	diff=difftime(now, start);
-	est=(time_t)progbar->Num/(progbar->i-1.)*diff;
-	et=est-diff;
-	//fprintf(stderr, "%lu\n", est);
-	//est=(time_t) t*N;
+	{
+		struct timespec tn;
+		clock_gettime(CLOCK_MONOTONIC, &tn);
+		now=(double)tn.tv_sec+(double)tn.tv_nsec*1e-9;
+	}
+	diff=now-start;
+	est=(progbar->Num)*diff/argi;
+	est-=diff;
+	et=(time_t)est;
+	//fprintf(stderr, "Dif: %lf\n", diff);
+	//fprintf(stderr, "Est: %lf\n", est);
 	eta=localtime(&et);
 	//fprintf(stderr, "%lu\n", eta->tm_hour);
 	
@@ -151,37 +159,30 @@ void pbar_eta(pbar* progbar){
 	return;
 }
 
-void pbar_draw(pbar* progbar){
+void pbar_draw(pbar* progbar, uint64_t argi){
 	char* mem = progbar->bar;
-	unsigned int nblks, perc, len=progbar->len, i=progbar->i, Num=progbar->Num;
+	unsigned int nblks, perc, len=progbar->len, i;
+	uint64_t Num=progbar->Num, vari=argi;
 	unsigned int u, d, c;
 
-	perc=(long unsigned int)i*100/(Num-1);//Intermediate long to avoid overflow
 
 	if(mem == 0){
 		progbar->err|=ERR_MEM;
 		return;
 	}
-	if(i>(Num-1)){
+	if(vari>(Num-1)){
 	     	progbar->err|=WARN_PERC;
-		perc=0;
+		vari=0;
 	}
+	//progbar->i=vari;
+	perc=vari*100/(Num-1);
 	
 	//printf("Perc= %u\t%u\n", i, perc);
 	if(perc==progbar->perc) return;//Same percentage, nothing to do
 	else{
 		//printf("\tqui\n");
-		nblks=(long unsigned int)i*len/(Num-1); //Calculate new number of blocks
 		progbar->perc=perc;//Update stored perc
-		//if(nblks==progbar->nblks){//Same nblks, just update percentage
-		//	u=perc%10;
-                //        d=(perc/10)%10;
-                //        c=perc/100;
-                //        mem[len+2]=c*(1+'0'-' ')+' ';
-                //        mem[len+3]=(c+d==0) ? ' ' : d+'0';//Migliorare
-                //        mem[len+4]=u+'0';
-                //        return;
-		//}
+		nblks=vari*len/(Num-1); //Calculate new number of blocks
                 if(nblks==(progbar->nblks)+1){ //Add one block
 			//printf("\t\tnewblock\n");
 	       	        mem[nblks]='|'; //Draw another block
@@ -203,7 +204,7 @@ void pbar_draw(pbar* progbar){
 		mem[len+4]=u+'0';
 	}
 	
-	pbar_eta(progbar);
+	pbar_eta(progbar, vari);
 	
 	return;
 
@@ -246,6 +247,6 @@ void pbar_draw(pbar* progbar){
 }
 
 void pbar_close(pbar* progbar){
-	munmap(progbar->bar, progbar->len+23);
+	munmap(progbar->bar, progbar->len+ADDLEN+1);
 	close(progbar->file);
 }
