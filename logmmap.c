@@ -14,6 +14,15 @@
 #define WARN_LEN 16
 #define ERR_MEM 32
 #define WARN_NUM 64
+#define WARN_NT 128
+
+//#ifdef OPENMP_MODE
+//	#define MAX (progbar->Num/progbar->NT)
+//	#define I (argi%MAX)
+//#else
+//	#define MAX (progbar->Num)
+//	#define I (argi) //For efficiency
+//#endif
 
 
 typedef struct{
@@ -22,21 +31,20 @@ typedef struct{
 	//unsigned int perc;
 	//uint64_t i;
 	uint64_t Num;
+	uint64_t max;
 	unsigned int perc;
 	unsigned int nblks;
 	unsigned int err;
 	//char* filename;
 	int file;
 	double start;
+	unsigned int NT;
 }pbar;
 
-//Crea la struttura grafica della barra.
-//La lunghezza e il puntatore dentro lo struct devono essere
-//gia' preparati prima con mmap.
-//Prevede barra lunga len e percentuale (xx%) e accapo a terminare.
-void pbar_init(pbar* progbar, char* filename, uint64_t Num, unsigned int len){
+
+void pbar_init(pbar* progbar, char* filename, uint64_t Num, unsigned int len, unsigned int NT){
 	uint64_t i, iNum;
-	unsigned int ilen;
+	unsigned int ilen, iNT;
 	char* mem;
 	int file;
 	
@@ -45,6 +53,7 @@ void pbar_init(pbar* progbar, char* filename, uint64_t Num, unsigned int len){
 	
 	ilen=len;
 	iNum=Num;
+	iNT=NT;
 	if(len<3){
 		progbar->err|=WARN_LEN;
 		ilen=8;
@@ -53,8 +62,14 @@ void pbar_init(pbar* progbar, char* filename, uint64_t Num, unsigned int len){
 		progbar->err|=WARN_NUM;
 		iNum=1e6;
 	}
+	if(NT>Num){
+		progbar->err|=WARN_NT;
+		iNT=1;
+	}
 	progbar->Num=iNum;
+	progbar->max=iNum/iNT;
 	progbar->len=ilen;
+	progbar->NT=iNT;
 
 	file=open(filename, O_RDWR|O_CREAT, S_IRWXU|S_IRWXG|S_IRWXO);
 	if(file<0){
@@ -134,7 +149,7 @@ void pbar_eta(pbar* progbar, uint64_t argi){
 		now=(double)tn.tv_sec+(double)tn.tv_nsec*1e-9;
 	}
 	diff=now-start;
-	est=(progbar->Num)*diff/argi;
+	est=(progbar->max)*diff/argi;
 	est-=diff;
 	et=(time_t)est;
 	//fprintf(stderr, "Dif: %lf\n", diff);
@@ -162,33 +177,40 @@ void pbar_eta(pbar* progbar, uint64_t argi){
 void pbar_draw(pbar* progbar, uint64_t argi){
 	char* mem = progbar->bar;
 	unsigned int nblks, perc, len=progbar->len, i;
-	uint64_t Num=progbar->Num, vari=argi;
+	uint64_t vari=argi, max=progbar->max;
 	unsigned int u, d, c;
 
+#ifdef OPENMP_MODE
+	if(argi>progbar->max)	return; //keep only first thread
+#endif
 
 	if(mem == 0){
 		progbar->err|=ERR_MEM;
 		return;
 	}
-	if(vari>(Num-1)){
+	//vari=argi;
+	//printf("%lu - %lu\n", vari, MAX);
+#ifndef OPENMP_MODE
+	if(vari>progbar->Num){
 	     	progbar->err|=WARN_PERC;
 		vari=0;
 	}
+#endif
 	//progbar->i=vari;
-	perc=vari*100/(Num-1);
+	perc=vari*100/(max-1);
 	
 	//printf("Perc= %u\t%u\n", i, perc);
 	if(perc==progbar->perc) return;//Same percentage, nothing to do
 	else{
 		//printf("\tqui\n");
 		progbar->perc=perc;//Update stored perc
-		nblks=vari*len/(Num-1); //Calculate new number of blocks
+		nblks=vari*len/(max-1); //Calculate new number of blocks
                 if(nblks==(progbar->nblks)+1){ //Add one block
 			//printf("\t\tnewblock\n");
 	       	        mem[nblks]='|'; //Draw another block
 	        }
 		else if(nblks!=progbar->nblks){//Not the same, redraw whole bar
-			for(i=0;i<nblks;i++){
+			for(i=1;i<nblks;i++){
                 	        mem[i]='|';
 	                }
         	        for(;i<len+1;i++){
@@ -207,43 +229,6 @@ void pbar_draw(pbar* progbar, uint64_t argi){
 	pbar_eta(progbar, vari);
 	
 	return;
-
-
-//	if(nblks==progbar->nblks){//Ottimizzazione
-//		if(perc==progbar->perc)	return;
-//		else{
-//			u=perc%10;
-//		        d=(perc/10)%10;
-//			c=perc/100;
-//			mem[len+2]=c*(1+'0'-' ')+' ';
-//			mem[len+3]=(c+d==0) ? ' ' : d+'0';//Migliorare
-//			mem[len+4]=u+'0';
-//			progbar->perc=perc;
-//
-//			return;
-//		}
-//	}
-//	if(nblks==(progbar->nblks)+1){ //If new nblks == old one+1...
-//		progbar->nblks=nblks; //Update nblks
-//		mem[nblks]='|'; //Draw another block
-//	}
-//	else if(nblks!=progbar->nblks){//Else redraw whole bar
-//		for(i=0;i<nblks;i++){
-//			mem[i]='|';
-//		}
-//		for(;i<len+1;i++){
-//			mem[i]=' ';
-//		}
-//	}
-//	progbar->perc=perc;
-//	u=perc%10;
-//	d=(perc/10)%10;
-//	c=perc/100;
-//	mem[len+2]=c*(1+'0'-' ')+' ';
-//	mem[len+3]=(c+d==0) ? ' ' : d+'0';//Migliorare
-//	mem[len+4]=u+'0';
-//
-//	return;
 }
 
 void pbar_close(pbar* progbar){
