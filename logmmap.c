@@ -234,4 +234,27 @@ void pbar_draw(pbar* progbar, uint64_t argi){
 void pbar_close(pbar* progbar){
 	munmap(progbar->bar, progbar->len+ADDLEN+1);
 	close(progbar->file);
+	fprintf(stderr, "err_c=%u\n", progbar->err);
+}
+
+void p_init(pbar* progbar, char* filename, int64_t* Num, int64_t* len, int64_t* NT){
+	uint64_t N, l, N_T;
+	N=(uint64_t) *Num;
+	l=(uint64_t) *len;
+	N_T=(uint64_t) *NT;
+	int i=0;
+	while (filename[i]!=' '){
+		i++;
+	}
+	filename[i]='\0';
+	fprintf(stderr, "filename=%s\n", filename);
+	pbar_init(progbar, filename, N, l, N_T);
+	return;
+}
+
+void p_draw(pbar* progbar, int64_t* argi){
+	uint64_t arg_i;
+	arg_i=(uint64_t) *argi;
+	pbar_draw(progbar, arg_i);
+	return;
 }
