@@ -4,16 +4,16 @@
 //#include <math.h>
 //#include<sys/types.h>
 #include "xmmrand.c"
-#define OPENMP_MODE
 #include "logmmap.c"
 
+//#define OPENMP_MODE
 #ifdef OPENMP_MODE
   #include<omp.h>
 #endif
 
 
-#define N (uint64_t)1E9
-#define NTHREADS 2
+#define N (uint64_t)1E8
+#define NTHREADS 1
 
 
 int main(){
@@ -28,7 +28,7 @@ int main(){
 		SetRandomSeed(w+i);
 	}
 	//printf("Workspaces: %p - %p\n", (void*)w, (void*)(w+1));
-	pbar_init(&barra, filename, N, 20, NTHREADS);
+	pbar_init(&barra, filename, N, 20, NTHREADS, '|');
 	if (barra.err!=0){
 		return -1;
 	}
@@ -37,7 +37,11 @@ int main(){
  	#pragma omp parallel for num_threads(NTHREADS) private(i, y, z) reduction(+:pi)
 	#endif
 	for(i=0;i<N;i++){
+		#ifdef OPENMP_MODE
 		workspace_t* W=w+omp_get_thread_num();
+		#else
+		workspace_t* W=w;
+		#endif
 		y = RSUnif(W, 0., 1.);
 		z = RSUnif(W, 0., 1.);
 		//printf("Thread %d - %lu - %p - %p\n", omp_get_thread_num(), i, (void*)w, (void*)W);
