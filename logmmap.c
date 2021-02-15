@@ -112,8 +112,8 @@ void pbar_init(pbar* progbar, char* filename, uint64_t Num, unsigned int len, un
 }
 
 //void pbar_eta(pbar* progbar, uint64_t argi)__attribute__((always_inline));
-void pbar_eta(char*mem, unsigned int len, unsigned int max, double start, uint64_t argi)__attribute__((always_inline));
-void pbar_eta(char*mem, unsigned int len, unsigned int max, double start, uint64_t argi){
+void pbar_eta(char*mem, unsigned int len, uint64_t max, double start, uint64_t argi)__attribute__((always_inline));
+void pbar_eta(char*mem, unsigned int len, uint64_t max, double start, uint64_t argi){
 	//char* mem = progbar->bar;
 	//unsigned int len=progbar->len, max=progbar->max;
 	//double start=progbar->start;
@@ -165,7 +165,7 @@ void pbar_draw(pbar* progbar, uint64_t argi){
 	}
 	max=progbar->max;
 	perc=vari*100/(max-1);
-	
+	//fprintf(stderr,"vari=%lu\n", vari);
 	if(perc==progbar->perc) return;//Same percentage, nothing to do
 	else{
 		mem=progbar->bar;
@@ -183,9 +183,9 @@ void pbar_draw(pbar* progbar, uint64_t argi){
 			for(i=1;i<nblks;i++){
                 	        mem[i]=progbar->fill;
 	                }
-        	        for(;i<len+1;i++){
-        	                mem[i]=' ';
-	                }
+        	        //for(;i<len+1;i++){
+        	          //      mem[i]=' ';
+	                //}
 		}
 		progbar->nblks=nblks; //Update stored nblks
 		u=perc%10;
