@@ -15,6 +15,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
+ #ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -91,7 +94,12 @@ void pbar_init(pbar* progbar, char* filename, uint64_t Num, unsigned int len, un
 	}
 
 	progbar->file=file;
+	#ifdef __cplusplus
+	mem=static_cast<char*>(mmap(0, ilen+ADDLEN+1, PROT_WRITE|PROT_READ, MAP_SHARED, file, 0));
+	#endif
+	#ifndef __cplusplus
 	mem=mmap(0, ilen+ADDLEN+1, PROT_WRITE|PROT_READ, MAP_SHARED, file, 0);
+	#endif
 	if((void*)mem==(void*)-1){
 		progbar->err|=ERR_MMAP;
 		return;
@@ -250,3 +258,7 @@ void p_draw(pbar* progbar, int64_t* argi){
 	pbar_draw(progbar, arg_i);
 	return;
 }
+
+#ifdef __cplusplus
+}
+#endif

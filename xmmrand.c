@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <math.h>
 
@@ -120,4 +124,8 @@ vsd xorshift128v(uint64_t** s){
 	return res;
 }
 */
+
+#ifdef __cplusplus
+}
+#endif
 
