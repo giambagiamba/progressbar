@@ -70,7 +70,7 @@ Errors and warnings are stored in the field err of the pbar struct. Errors and w
 * ERR\_MEM: pbar\_draw has been called but bar field is zero;
 * WARN\_NUM: pbar\_init has been called with Num=0; a default value of one million is used instead;
 
-These errors and warnings are or-ed together. To check for a specific one, one must "and" err and the error/warning searched. For example to check for ERR\_FILEOPEN, do: `if((progbar-\>err&ERR\_FILEOPEN)!=0)`.
+These errors and warnings are or-ed together. To check for a specific one, one must "and" err and the error/warning searched. For example to check for ERR\_FILEOPEN, do: `if((progbar->err&ERR_FILEOPEN)!=0)`.
 
 ## Examples <a name="Examples"></a>
 File main.c is an example program that shows how to use the pbar library (file xmmrand.c is a dependance). It uses a random number generator to calculate pi and displays the progress bar on file reso.log. One can launch the example program and watch the file showing the advancing pbar. At the end the calculated value of pi is shown.

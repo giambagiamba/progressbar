@@ -255,7 +255,7 @@ void p_init(pbar* progbar, char* filename, int64_t* Num, int64_t* len, int64_t* 
 void p_draw(pbar* progbar, int64_t* argi){
 	uint64_t arg_i;
 	arg_i=(uint64_t) *argi;
-	pbar_draw(progbar, arg_i);
+	pbar_draw(progbar, arg_i-1);
 	return;
 }
 

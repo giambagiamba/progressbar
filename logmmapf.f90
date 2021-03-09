@@ -27,12 +27,13 @@
 	
 	module logmmap
 		INTERFACE
-                SUBROUTINE pbar_init(progbar, filename, N, el, NT) BIND(C, NAME='p_init')
+                SUBROUTINE pbar_init(progbar, filename, N, el, NT, fill) BIND(C, NAME='p_init')
                         use pbar_type
                         IMPLICIT NONE
                         type(pbar_t) :: progbar
                         character :: filename
                         integer(c_long) :: N, el, NT
+                        character :: fill
                 END SUBROUTINE pbar_init
         END INTERFACE
 		INTERFACE
