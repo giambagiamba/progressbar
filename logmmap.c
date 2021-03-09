@@ -201,9 +201,9 @@ void pbar_draw(pbar* progbar, uint64_t argi){
 			for(i=1;i<nblks;i++){
                 	        mem[i]=progbar->fill;
 	                }
-        	        //for(;i<len+1;i++){
-        	          //      mem[i]=' ';
-	                //}
+        	        for(;i<len+1;i++){
+        	                mem[i]=' ';
+	                }
 		}
 		progbar->nblks=nblks; //Update stored nblks
 		u=perc%10;

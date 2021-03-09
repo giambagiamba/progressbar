@@ -4,16 +4,16 @@
 //#include <math.h>
 //#include<sys/types.h>
 #include "xmmrand.c"
-#include "logmmap.c"
 
-//#define OPENMP_MODE
+#define OPENMP_MODE
 #ifdef OPENMP_MODE
   #include<omp.h>
 #endif
 
+#include "logmmap.c"
 
-#define N (uint64_t)1E8
-#define NTHREADS 1
+#define N (uint64_t)1E9
+#define NTHREADS 2
 
 
 int main(){
