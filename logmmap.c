@@ -173,7 +173,7 @@ void pbar_draw(pbar* progbar, uint64_t argi){
 	unsigned int u, d, c;
 
 	vari=argi;
-	if(vari>progbar->max){
+	if(vari>=progbar->max){
 		#ifdef OPENMP_MODE	//If more thread this condition is true when
 			return;		//calling thread is not the first one.
 		#else
