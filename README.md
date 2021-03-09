@@ -30,11 +30,11 @@ The pbar structured type is defined. It contains:
 
 Six functions are available: pbar\_init, pbar\_eta, pbar\_draw, pbar\_close, p\_init, p\_draw. They are all void-returning.
 
-* void pbar\_init(pbar\* progbar, char\* filename, uint64\_t Num, unsigned int len, unsigned int NT, char fill): It opens filename and maps it in memory (using open, fallocate and mmap), and initializes the content of pbar according to its arguments. i, perc, err and nblks are set to 0.
-* void pbar\_eta(pbar\* progbar, uint64\_t argi): It calculates and prints ETA. It is called by pbar\_draw.
-* void pbar\_draw(pbar\* progbar, uint64\_t argi): It updates progbar-\>nblks and perc according to argi, and draw the bar, the new percentage and ETA. In case the new calculated percentage is the same stored in progbar, it returns. The same is done after checking the new calculated value of nblks.
-* pbar\_close: It unmaps the file and closes it.
-* p\_init and p\_draw: wrapper. They are called by logmmapf.f90.
+* `void pbar\_init(pbar\* progbar, char\* filename, uint64\_t Num, unsigned int len, unsigned int NT, char fill)`: It opens filename and maps it in memory (using open, fallocate and mmap), and initializes the content of pbar according to its arguments. i, perc, err and nblks are set to 0.
+* `void pbar\_eta(pbar\* progbar, uint64\_t argi)`: It calculates and prints ETA. It is called by pbar\_draw.
+* `void pbar\_draw(pbar\* progbar, uint64\_t argi)`: It updates progbar-\>nblks and perc according to argi, and draw the bar, the new percentage and ETA. In case the new calculated percentage is the same stored in progbar, it returns. The same is done after checking the new calculated value of nblks.
+* `pbar\_close(pbar\* progbar)`: It unmaps the file and closes it.
+* `p\_init(pbar\* progbar, char\* filename, int64\_t\* Num, int64\_t\* len, int64\_t\* NT, char\* fill)` and `p\_draw(pbar\* progbar, int64\_t\* argi)`: wrapper. They are called by logmmapf.f90.
 
 ### logmmapf.f90
 Fortran wrapper of the C library.
@@ -45,13 +45,13 @@ The module logmmap defines the wrappers for the subroutines pbar\_init, pbar\_dr
 ### C/C++ <a name="C"></a>
 * Include directly "logmmap.c" in order to have a better performance. The file has to be included AFTER the define of OPEN\_MP. OPEN\_MP doesn't work if you include logmmap.h, because the macro is not known at compilation time.
 * Declare a variable of type pbar.
-* Call pbar\_init passing as first argument the pointer to the pbar variable and the others according to your choice. In case of error, pbar.err will be set (see *Errors* section).
+* Call pbar\_init passing as first argument the pointer to the pbar variable and the others according to your choice. In case of error, pbar.err will be set (see [Errors](#Errors) section).
 * In your job cycle, update the bar by calling pbar\_draw. It is suggested to avoid to do the call every cycle, instead check that the calculated percentage is different from the previous value. Calling pbar\_draw with the same value of percentage won't change the bar but introduces the overhead of the call uselessly.
 * When done, call pbar\_close to unmap the file and close it.
 * The bar is stored in a file. In order to visualize the bar is suggested to use, under UNIX systems, `watch cat <file>`.
 
 ### Fortran <a name="F2003"></a>
-* Fortran2003 or later is required due to `iso\_c\_binding`.
+* Fortran2003 or later is required due to `iso_c_binding`.
 * Use `pbar_type` and `logmmap` (stored in file logmmapf.f90).
 * Declare a variable of `type(pbar_t)`.
 * Follow the same steps as in C/C++.
