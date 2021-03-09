@@ -30,11 +30,11 @@ The pbar structured type is defined. It contains:
 
 Six functions are available: pbar\_init, pbar\_eta, pbar\_draw, pbar\_close, p\_init, p\_draw. They are all void-returning.
 
-* `void pbar\_init(pbar\* progbar, char\* filename, uint64\_t Num, unsigned int len, unsigned int NT, char fill)`: It opens filename and maps it in memory (using open, fallocate and mmap), and initializes the content of pbar according to its arguments. i, perc, err and nblks are set to 0.
-* `void pbar\_eta(pbar\* progbar, uint64\_t argi)`: It calculates and prints ETA. It is called by pbar\_draw.
-* `void pbar\_draw(pbar\* progbar, uint64\_t argi)`: It updates progbar-\>nblks and perc according to argi, and draw the bar, the new percentage and ETA. In case the new calculated percentage is the same stored in progbar, it returns. The same is done after checking the new calculated value of nblks.
-* `pbar\_close(pbar\* progbar)`: It unmaps the file and closes it.
-* `p\_init(pbar\* progbar, char\* filename, int64\_t\* Num, int64\_t\* len, int64\_t\* NT, char\* fill)` and `p\_draw(pbar\* progbar, int64\_t\* argi)`: wrapper. They are called by logmmapf.f90.
+* `void pbar_init(pbar* progbar, char* filename, uint64_t Num, unsigned int len, unsigned int NT, char fill)`: It opens filename and maps it in memory (using open, fallocate and mmap), and initializes the content of pbar according to its arguments. i, perc, err and nblks are set to 0.
+* `void pbar_eta(pbar* progbar, uint64_t argi)`: It calculates and prints ETA. It is called by pbar\_draw.
+* `void pbar_draw(pbar* progbar, uint64_t argi)`: It updates progbar-\>nblks and perc according to argi, and draw the bar, the new percentage and ETA. In case the new calculated percentage is the same stored in progbar, it returns. The same is done after checking the new calculated value of nblks.
+* `pbar_close(pbar* progbar)`: It unmaps the file and closes it.
+* `p_init(pbar* progbar, char* filename, int64_t* Num, int64_t* len, int64_t* NT, char* fill)` and `p_draw(pbar* progbar, int64_t* argi)`: wrapper. They are called by logmmapf.f90.
 
 ### logmmapf.f90
 Fortran wrapper of the C library.
