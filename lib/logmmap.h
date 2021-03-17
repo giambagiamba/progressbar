@@ -15,9 +15,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
+
+#ifndef LOGMMAP_H
+#define LOGMMAP_H
+
  #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /*__cplusplus*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,7 +45,7 @@ extern "C" {
 #define pbar_draw pbar_draw_mt
 #else
 #define pbar_draw pbar_draw
-#endif
+#endif /*OPENMP_MODE*/
 
 typedef struct{
 	char* bar;
@@ -73,4 +77,6 @@ void p_draw(pbar* progbar, int64_t* argi);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /*__cplusplus*/
+
+#endif /*LOGMMAP_H*/

@@ -15,9 +15,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
+ 
+#ifndef LOGMMAP_C
+#define LOGMMAP_C
+
  #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /*__cplusplus*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -310,4 +314,6 @@ void p_draw(pbar* progbar, int64_t* argi){
 
 #ifdef __cplusplus
 }
-#endif
+#endif /*__cplusplus*/
+
+#endif /*LOGMMAP_C*/
