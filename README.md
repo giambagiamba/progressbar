@@ -14,7 +14,7 @@ Simple C library for drawing a progress bar on a memory mapped log file. It is d
 	
 ## Content of the library <a name="content"></a>
 The files are stored in two directories: lib/ and tests/. Go to [Examples](#Examples) to see the content of the second folder.
-### logmmap.c
+### logmmap.c <a name="logmmap"></a>
 C library (C++ compatible).
 The pbar structured type is defined. It contains:
 
@@ -38,7 +38,7 @@ Seven functions are available: pbar\_init, pbar\_eta, pbar\_draw, pbar\_draw\_mt
 * `pbar_close(pbar* progbar)`: It unmaps the file and closes it.
 * `p_init(pbar* progbar, char* filename, int64_t* Num, int64_t* len, int64_t* NT, char* fill)` and `p_draw(pbar* progbar, int64_t* argi)`: wrapper. They are called by logmmapf.f90.
 
-### logmmapf.f90
+### logmmapf.f90 <a name="logmmapf"></a>
 Fortran wrapper of the C library.
 The module pbar\_type is defined. It is a wrapper of the pbar structured type.
 The module logmmap defines the wrappers for the subroutines pbar\_init, pbar\_draw, pbar\_close. 
