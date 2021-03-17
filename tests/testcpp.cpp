@@ -4,6 +4,7 @@
 #define OPENMP_MODE
 #ifdef OPENMP_MODE
   #include<omp.h>
+  #define PROGRESSBAR_MT
 #endif
 
 #include "lib/xmmrand.c"
