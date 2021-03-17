@@ -227,6 +227,55 @@ void pbar_draw(pbar* progbar, uint64_t argi){
 	return;
 }
 
+/*Same as pbar_draw when multithreading option is active*/
+void pbar_draw_mt(pbar* progbar, uint64_t argi){
+	char* mem;
+	unsigned int nblks, perc, len, i;
+	uint64_t vari, max;
+	unsigned int u, d, c;
+
+	vari=argi;
+	if(vari>=progbar->max){
+			return;		//calling thread is not the first one.
+	}
+	max=progbar->max;
+	perc=vari*100/(max-1);
+	//fprintf(stderr,"vari=%lu\n", vari);
+	if(perc==progbar->perc) return;//Same percentage, nothing to do
+	else{
+		mem=progbar->bar;
+		if(mem == 0){
+			progbar->err|=ERR_MEM;
+			return;
+		}
+		progbar->perc=perc;//Update stored perc
+		len=progbar->len;
+		nblks=vari*len/(max-1); //Calculate new number of blocks
+                if(nblks==(progbar->nblks)+1){ //Add one block
+	       	        mem[nblks]=progbar->fill; //Draw another block
+	        }
+		else if(nblks!=progbar->nblks){//Not the same, redraw whole bar
+			for(i=1;i<nblks;i++){
+                	        mem[i]=progbar->fill;
+	                }
+        	        for(;i<len+1;i++){
+        	                mem[i]=' ';
+	                }
+		}
+		progbar->nblks=nblks; //Update stored nblks
+		u=perc%10;
+		d=(perc/10)%10;
+		c=perc/100;
+		mem[len+2]=c*(1+'0'-' ')+' ';
+		mem[len+3]=(c+d==0) ? ' ' : d+'0';//Migliorare
+		mem[len+4]=u+'0';
+	}
+	//char*mem, unsigned int len, unsigned int max, double start, uint64_t argi
+	pbar_eta(mem, len, max, progbar->start, vari);
+	
+	return;
+}
+
 void pbar_close(pbar* progbar){
 	munmap(progbar->bar, progbar->len+ADDLEN+1);
 	close(progbar->file);

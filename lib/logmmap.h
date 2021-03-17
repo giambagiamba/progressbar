@@ -15,6 +15,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
+ #ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,6 +37,11 @@
 #define WARN_NUM 64
 #define WARN_NT 128
 
+#ifdef OPENMP_MODE
+#define pbar_draw pbar_draw_mt
+#else
+#define pbar_draw pbar_draw
+#endif
 
 typedef struct{
 	char* bar;
@@ -51,12 +59,18 @@ typedef struct{
 
 void pbar_init(pbar* progbar, char* filename, uint64_t Num, unsigned int len, unsigned int NT, char fill);
 
-void pbar_eta(pbar* progbar, uint64_t argi)__attribute__((always_inline));
+void pbar_eta(char*mem, unsigned int len, uint64_t max, double start, uint64_t argi)__attribute__((always_inline));
 
 void pbar_draw(pbar* progbar, uint64_t argi);
+
+void pbar_draw_mt(pbar* progbar, uint64_t argi);
 
 void pbar_close(pbar* progbar);
 
 void p_init(pbar* progbar, char* filename, int64_t* Num, int64_t* len, int64_t* NT, char* fill);
 
 void p_draw(pbar* progbar, int64_t* argi);
+
+#ifdef __cplusplus
+}
+#endif
