@@ -41,7 +41,7 @@ extern "C" {
 #define WARN_NUM 64
 #define WARN_NT 128
 
-#ifdef OPENMP_MODE
+#ifdef PROGRESSBAR_MT
 #define pbar_draw pbar_draw_mt
 #else
 #define pbar_draw pbar_draw

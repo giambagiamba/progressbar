@@ -186,7 +186,7 @@ void pbar_draw(pbar* progbar, uint64_t argi){
 
 	vari=argi;
 	if(vari>=progbar->max){
-		#ifdef OPENMP_MODE	//If more thread this condition is true when
+		#ifdef PROGRESSBAR_MT	//If more thread this condition is true when
 			return;		//calling thread is not the first one.
 		#else
 			progbar->err|=WARN_PERC; //If 1 thread i is over max
