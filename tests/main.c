@@ -3,14 +3,14 @@
 //#include <stdint.h>
 //#include <math.h>
 //#include<sys/types.h>
-#include "xmmrand.c"
+#include "lib/xmmrand.c"
 
 #define OPENMP_MODE
 #ifdef OPENMP_MODE
   #include<omp.h>
 #endif
 
-#include "logmmap.c"
+#include "../lib/logmmap.c"
 
 #define N (uint64_t)1E9
 #define NTHREADS 2

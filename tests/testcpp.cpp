@@ -6,8 +6,8 @@
   #include<omp.h>
 #endif
 
-#include "xmmrand.c"
-#include "logmmap.c"
+#include "lib/xmmrand.c"
+#include "../lib/logmmap.c"
 
 #define N (uint64_t)1E9
 #define NTHREADS 2
