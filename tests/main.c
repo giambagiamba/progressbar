@@ -9,12 +9,14 @@
 #ifdef OPENMP_MODE
   #include<omp.h>
   #define PROGRESSBAR_MT
+  #define NTHREADS 2
+#else
+  #define NTHREADS 1
 #endif
 
-#include "../lib/logmmap.c"
+#include "../lib/logmmap.h"
 
 #define N (uint64_t)1E9
-#define NTHREADS 2
 
 
 int main(){

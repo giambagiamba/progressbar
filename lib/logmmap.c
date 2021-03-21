@@ -19,17 +19,17 @@
 #ifndef LOGMMAP_C
 #define LOGMMAP_C
 
- #ifdef __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif /*__cplusplus*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include<unistd.h>
-#include<fcntl.h>
-#include<time.h>
-#include<sys/mman.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <time.h>
+#include <sys/mman.h>
 #define ADDLEN 23
 
 #define ERR_FILEOPEN 1
@@ -41,6 +41,11 @@ extern "C" {
 #define WARN_NUM 64
 #define WARN_NT 128
 
+#ifdef PROGRESSBAR_MT
+#define pbar_draw pbar_draw_mt
+#else
+#define pbar_draw pbar_draw_st
+#endif /*PROGRESSBAR_MT*/
 
 typedef struct{
 	char* bar;
@@ -178,7 +183,7 @@ void pbar_eta(char*mem, unsigned int len, uint64_t max, double start, uint64_t a
 	return;
 }
 
-void pbar_draw(pbar* progbar, uint64_t argi){
+void pbar_draw_st(pbar* progbar, uint64_t argi){
 	char* mem;
 	unsigned int nblks, perc, len, i;
 	uint64_t vari, max;
@@ -186,12 +191,8 @@ void pbar_draw(pbar* progbar, uint64_t argi){
 
 	vari=argi;
 	if(vari>=progbar->max){
-		#ifdef PROGRESSBAR_MT	//If more thread this condition is true when
-			return;		//calling thread is not the first one.
-		#else
 			progbar->err|=WARN_PERC; //If 1 thread i is over max
 			vari=0; //Default to 0
-		#endif
 	}
 	max=progbar->max;
 	perc=vari*100/(max-1);

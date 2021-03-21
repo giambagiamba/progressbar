@@ -19,7 +19,7 @@
 #ifndef LOGMMAP_H
 #define LOGMMAP_H
 
- #ifdef __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif /*__cplusplus*/
 
@@ -44,8 +44,8 @@ extern "C" {
 #ifdef PROGRESSBAR_MT
 #define pbar_draw pbar_draw_mt
 #else
-#define pbar_draw pbar_draw
-#endif /*OPENMP_MODE*/
+#define pbar_draw pbar_draw_st
+#endif /*PROGRESSBAR_MT*/
 
 typedef struct{
 	char* bar;
