@@ -1,3 +1,4 @@
+
 # Progress bar
 Simple C library for drawing a progress bar on a memory mapped log file. It is designed to introduce as little overhead as possible. It is compatible with C++ and Fortran.
 
